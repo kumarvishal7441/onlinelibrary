@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
-import { addBook } from '../store';
-import { FaArrowLeft } from 'react-icons/fa';
-import { GoPlusCircle } from 'react-icons/go';
+import { useNavigate } from 'react-router-dom';
+import { addBook } from '../store/app';
+import { TbImageInPicture } from 'react-icons/tb';
+import { FaRegCheckCircle } from 'react-icons/fa';
 import { FiAlertCircle } from 'react-icons/fi';
+import { AiOutlinePlusCircle } from 'react-icons/ai';
 
- function AddBook() {
+const categories = ['Fiction', 'Non-Fiction', 'Sci-Fi'];
+
+function AddBook() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     title: '',
     author: '',
-    category: 'Fiction',
     description: '',
-    rating: '4.5',
+    category: 'Fiction',
+    rating: 4.5,
+    coverImage: '',
   });
 
   const [errors, setErrors] = useState({});
@@ -26,12 +30,8 @@ import { FiAlertCircle } from 'react-icons/fi';
     if (!formData.title.trim()) newErrors.title = 'Title is required';
     if (!formData.author.trim()) newErrors.author = 'Author is required';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
-    else if (formData.description.length < 20) newErrors.description = 'Description must be at least 20 characters';
-    
-    const ratingNum = parseFloat(formData.rating);
-    if (isNaN(ratingNum) || ratingNum < 0 || ratingNum > 5) {
-      newErrors.rating = 'Rating must be between 0 and 5';
-    }
+    if (formData.description.length < 20) newErrors.description = 'Description must be at least 20 characters';
+    if (formData.rating < 0 || formData.rating > 5) newErrors.rating = 'Rating must be between 0 and 5';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -42,25 +42,28 @@ import { FiAlertCircle } from 'react-icons/fi';
     if (!validate()) return;
 
     setIsSubmitting(true);
-    
+
     setTimeout(() => {
       const newBook = {
+        ...formData,
         id: Date.now().toString(),
-        title: formData.title,
-        author: formData.author,
-        category: formData.category,
-        description: formData.description,
-        rating: parseFloat(formData.rating),
+        coverImage: formData.coverImage || `https://picsum.photos/seed/${formData.title}/400/600`,
       };
 
       dispatch(addBook(newBook));
-      navigate('/books');
+      setIsSubmitting(false);
+      navigate('/browse');
     }, 800);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === 'rating' ? parseFloat(value) : value,
+    }));
+
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -71,120 +74,170 @@ import { FiAlertCircle } from 'react-icons/fi';
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
-      <Link to="/" className="inline-flex items-center gap-2 text-sm font-bold text-emerald-600 mb-8 hover:gap-3 transition-all">
-        <FaArrowLeft size={16} /> Back to Home
-      </Link>
+    <div className="max-w-3xl mx-auto py-12">
 
-      <div className="bg-white rounded-[2.5rem] border border-black/5 shadow-2xl shadow-black/5 overflow-hidden">
-        <div className="bg-emerald-950 p-10 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full -mr-32 -mt-32 blur-3xl" />
-          <div className="relative z-10">
-            <h1 className="text-4xl font-serif italic font-bold mb-3">Add to Collection</h1>
-            <p className="text-emerald-100/60">Share a new literary masterpiece with the Lumina community.</p>
-          </div>
-        </div>
+      <div className="mb-12 text-center">
+        <h1 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
+          Add a New Book
+        </h1>
+        <p className="mt-4 text-zinc-500">
+          Share a new story with our community. Fill in the details below to add a book to the library.
+        </p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="p-10 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="rounded-3xl border border-zinc-200 bg-white p-8 shadow-xl sm:p-12">
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+
+          {/* Title + Author */}
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Book Title</label>
+              <label className="text-sm font-bold text-zinc-900">Book Title</label>
               <input
                 type="text"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                placeholder="e.g. The Midnight Library"
-                className={`w-full px-5 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-4 transition-all ${
-                  errors.title ? 'border-red-200 focus:ring-red-500/10' : 'border-transparent focus:ring-emerald-500/10 focus:border-emerald-500'
-                }`}
+                placeholder="e.g. The Great Gatsby"
+                className={`w-full rounded-2xl border ${errors.title ? 'border-red-500' : 'border-zinc-200'} px-4 py-3 text-sm`}
               />
-              {errors.title && <p className="text-xs font-bold text-red-500 flex items-center gap-1"><FiAlertCircle size={12} /> {errors.title}</p>}
+              {errors.title && (
+                <p className="flex items-center gap-1 text-xs text-red-500">
+                  <FiAlertCircle className="h-3 w-3" /> {errors.title}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Author Name</label>
+              <label className="text-sm font-bold text-zinc-900">Author Name</label>
               <input
                 type="text"
                 name="author"
                 value={formData.author}
                 onChange={handleChange}
-                placeholder="e.g. Matt Haig"
-                className={`w-full px-5 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-4 transition-all ${
-                  errors.author ? 'border-red-200 focus:ring-red-500/10' : 'border-transparent focus:ring-emerald-500/10 focus:border-emerald-500'
-                }`}
+                placeholder="e.g. F. Scott Fitzgerald"
+                className={`w-full rounded-2xl border ${errors.author ? 'border-red-500' : 'border-zinc-200'} px-4 py-3 text-sm`}
               />
-              {errors.author && <p className="text-xs font-bold text-red-500 flex items-center gap-1"><FiAlertCircle size={12} /> {errors.author}</p>}
+              {errors.author && (
+                <p className="flex items-center gap-1 text-xs text-red-500">
+                  <FiAlertCircle className="h-3 w-3" /> {errors.author}
+                </p>
+              )}
             </div>
 
+          </div>
+
+          {/* Category + Rating */}
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Category</label>
+              <label className="text-sm font-bold text-zinc-900">Category</label>
               <select
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="w-full px-5 py-4 bg-gray-50 border border-transparent rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
+                className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm"
               >
-                <option>Fiction</option>
-                <option>Non-Fiction</option>
-                <option>Sci-Fi</option>
-                <option>Mystery</option>
-                <option>Biography</option>
+                {categories.map((cat) => (
+                  <option key={cat}>{cat}</option>
+                ))}
               </select>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Initial Rating (0-5)</label>
+              <label className="text-sm font-bold text-zinc-900">Rating</label>
               <input
                 type="number"
+                name="rating"
                 step="0.1"
                 min="0"
                 max="5"
-                name="rating"
                 value={formData.rating}
                 onChange={handleChange}
-                className={`w-full px-5 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-4 transition-all ${
-                  errors.rating ? 'border-red-200 focus:ring-red-500/10' : 'border-transparent focus:ring-emerald-500/10 focus:border-emerald-500'
-                }`}
+                className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm"
               />
-              {errors.rating && <p className="text-xs font-bold text-red-500 flex items-center gap-1"><FiAlertCircle size={12} /> {errors.rating}</p>}
+            </div>
+
+          </div>
+
+          {/* Cover Image */}
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-zinc-900">
+              Cover Image URL
+            </label>
+
+            <div className="relative">
+              <TbImageInPicture className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <input
+                type="url"
+                name="coverImage"
+                value={formData.coverImage}
+                onChange={handleChange}
+                className="w-full rounded-2xl border border-zinc-200 py-3 pl-12 pr-4 text-sm"
+              />
             </div>
           </div>
 
+          {/* Description */}
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Description</label>
+            <label className="text-sm font-bold text-zinc-900">
+              Description
+            </label>
+
             <textarea
               name="description"
+              rows={5}
               value={formData.description}
               onChange={handleChange}
-              rows={4}
-              placeholder="Provide a brief summary of the book..."
-              className={`w-full px-5 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-4 transition-all resize-none ${
-                errors.description ? 'border-red-200 focus:ring-red-500/10' : 'border-transparent focus:ring-emerald-500/10 focus:border-emerald-500'
-              }`}
+              className={`w-full rounded-2xl border ${errors.description ? 'border-red-500' : 'border-zinc-200'} px-4 py-3 text-sm`}
             />
-            {errors.description && <p className="text-xs font-bold text-red-500 flex items-center gap-1"><FiAlertCircle size={12} /> {errors.description}</p>}
+
+            {errors.description && (
+              <p className="flex items-center gap-1 text-xs text-red-500">
+                <FiAlertCircle className="h-3 w-3" /> {errors.description}
+              </p>
+            )}
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all ${
-              isSubmitting 
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xl shadow-emerald-600/20'
-            }`}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-8 py-4 text-sm font-bold text-white hover:bg-indigo-500"
           >
-            {isSubmitting ? (
-              <>Adding to Library...</>
-            ) : (
+            {isSubmitting ? "Adding Book..." : (
               <>
-                <GoPlusCircle size={20} /> Add Book to Collection
+                <AiOutlinePlusCircle className="h-5 w-5" />
+                Add to Library
               </>
             )}
           </button>
+
         </form>
+
       </div>
+
+      {/* Features */}
+      <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-3">
+
+        <div className="flex items-center gap-3 rounded-2xl bg-zinc-50 p-4">
+          <FaRegCheckCircle className="text-emerald-600" />
+          <span className="text-xs font-bold text-zinc-600">Instant Publishing</span>
+        </div>
+
+        <div className="flex items-center gap-3 rounded-2xl bg-zinc-50 p-4">
+          <FaRegCheckCircle className="text-emerald-600" />
+          <span className="text-xs font-bold text-zinc-600">Global Accessibility</span>
+        </div>
+
+        <div className="flex items-center gap-3 rounded-2xl bg-zinc-50 p-4">
+          <FaRegCheckCircle className="text-emerald-600" />
+          <span className="text-xs font-bold text-zinc-600">Community Driven</span>
+        </div>
+
+      </div>
+
     </div>
   );
 }

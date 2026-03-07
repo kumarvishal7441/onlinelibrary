@@ -1,4 +1,4 @@
-export const DUMMY_BOOKS = [
+const DUMMY_BOOKS = [
   {
     id: '1',
     title: 'The Midnight Library',
@@ -54,3 +54,4 @@ export const DUMMY_BOOKS = [
     coverImage: 'https://picsum.photos/seed/educated/400/600'
   }
 ];
+  export default DUMMY_BOOKS;

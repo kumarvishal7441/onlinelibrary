@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
-import { Search, Filter, Star } from 'lucide-react';
+import { FaFilter, FaRegStar, FaSearch } from 'react-icons/fa';
 
-const categories = ['Fiction', 'Non-Fiction', 'Sci-Fi', 'Mystery', 'Biography', 'Fantasy'];
+const categories = ['Fiction', 'Non-Fiction', 'Sci-Fi'];
 
 function BrowseBooks(){
   const { category: categoryParam } = useParams();
@@ -39,7 +39,7 @@ function BrowseBooks(){
         </div>
 
         <div className="relative max-w-md w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
+          <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
           <input
             type="text"
             placeholder="Search by title or author..."
@@ -101,7 +101,7 @@ function BrowseBooks(){
                 </span>
 
                 <div className="flex items-center gap-1">
-                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                  <FaRegStar className="h-3 w-3 fill-amber-400 text-amber-400" />
                   <span className="text-xs font-bold text-zinc-600">
                     {book.rating}
                   </span>
@@ -128,7 +128,7 @@ function BrowseBooks(){
       {filteredBooks.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="rounded-full bg-zinc-100 p-6 mb-4">
-            <Filter className="h-10 w-10 text-zinc-400" />
+            <FaFilter className="h-10 w-10 text-zinc-400" />
           </div>
 
           <h3 className="text-xl font-bold text-zinc-900">No books found</h3>

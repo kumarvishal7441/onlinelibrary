@@ -11,7 +11,7 @@ function Navbar() {
   const navItems = [
     { path: '/', label: 'Home', icon: IoMdHome },
     { path: '/browse', label: 'Browse Books', icon: FaBookOpen },
-    { path: '/add-book', label: 'Add Book', icon: FiPlusCircle },
+    { path: '/addbook', label: 'Add Book', icon: FiPlusCircle },
   ];
 
   return (
