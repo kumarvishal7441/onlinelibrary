@@ -4,7 +4,7 @@ import  DUMMY_BOOKS  from '../data/Book';
 const initialState = {
     books: DUMMY_BOOKS,
 };
-
+// create add book functionality
 const booksSlice = createSlice({
     name: 'books',
     initialState,
